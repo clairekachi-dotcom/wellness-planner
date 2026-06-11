@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Wellness Planner</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0e0e10;--surface:#16161a;--surface2:#1e1e24;--surface3:#26262e;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.13);
+    --text:#f0efe8;--text2:#9998a0;--text3:#5e5d66;
+    --accent:#c9a96e;--accent2:#e8c98a;
+    --teal:#5ecfb0;--pink:#e07fa0;--blue:#7ab3e0;--amber:#e0b060;--green:#8ecf7a;
+    --radius:12px;--radius-sm:8px;
+  }
+  html{scroll-behavior:smooth}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+  .nav{position:sticky;top:0;z-index:100;background:rgba(14,14,16,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;overflow-x:auto;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav-brand{font-family:'DM Serif Display',serif;font-size:15px;color:var(--accent);white-space:nowrap;padding:1rem 1.5rem 1rem 0;border-right:1px solid var(--border);margin-right:1rem}
+  .nav-btn{padding:0.85rem 1rem;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border:none;background:none;white-space:nowrap;border-bottom:2px solid transparent;transition:color 0.2s,border-color 0.2s;font-family:'DM Sans',sans-serif}
+  .nav-btn:hover{color:var(--text)}
+  .nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .section{display:none;padding:2rem 1.5rem;max-width:900px;margin:0 auto}
+  .section.active{display:block}
+  .hero{background:linear-gradient(135deg,#1a1608 0%,#0e1a14 50%,#0e1018 100%);border:1px solid var(--border2);border-radius:var(--radius);padding:2rem;margin-bottom:2rem;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(201,169,110,0.12) 0%,transparent 70%);pointer-events:none}
+  .hero-label{font-size:10px;letter-spacing:0.12em;color:var(--accent);text-transform:uppercase;font-weight:600;margin-bottom:0.4rem}
+  .hero-title{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text);line-height:1.2;margin-bottom:0.5rem}
+  .hero-sub{font-size:13px;color:var(--text2)}
+  .hero-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:1rem}
+  .hero-pill{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border2);color:var(--text2)}
+  .tab-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem}
+  .tab-btn{padding:6px 14px;font-size:12px;font-weight:500;border:1px solid var(--border2);border-radius:20px;cursor:pointer;background:var(--surface);color:var(--text2);transition:all 0.15s;font-family:'DM Sans',sans-serif}
+  .tab-btn:hover{color:var(--text)}
+  .tab-btn.active{background:var(--accent);color:#0e0e10;border-color:var(--accent)}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+  .sub-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:1rem}
+  .sub-btn{padding:4px 11px;font-size:11px;font-weight:500;border:1px solid var(--border);border-radius:12px;cursor:pointer;background:var(--surface2);color:var(--text2);font-family:'DM Sans',sans-serif;transition:all 0.15s}
+  .sub-btn.active{background:var(--surface3);border-color:var(--border2);color:var(--text)}
+  .sub-panel{display:none}
+  .sub-panel.active{display:block}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:10px}
+  .card-body{padding:11px 14px}
+  .step-list{display:flex;flex-direction:column;gap:8px}
+  .step{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:11px 14px}
+  .step-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;margin-top:1px}
+  .num-gold{background:rgba(201,169,110,0.15);color:var(--accent)}
+  .num-teal{background:rgba(94,207,176,0.12);color:var(--teal)}
+  .num-pink{background:rgba(224,127,160,0.12);color:var(--pink)}
+  .num-warn{background:rgba(224,176,96,0.12);color:var(--amber)}
+  .step-info{flex:1;min-width:0}
+  .step-product{font-size:13px;font-weight:500;color:var(--text);line-height:1.3}
+  .step-note{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.5}
+  .badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:6px;font-weight:500;margin-left:6px;vertical-align:middle}
+  .b-gold{background:rgba(201,169,110,0.15);color:var(--accent)}
+  .b-teal{background:rgba(94,207,176,0.12);color:var(--teal)}
+  .b-pink{background:rgba(224,127,160,0.12);color:var(--pink)}
+  .b-warn{background:rgba(224,176,96,0.12);color:var(--amber)}
+  .b-green{background:rgba(142,207,122,0.12);color:var(--green)}
+  .tip-box{background:rgba(201,169,110,0.06);border:1px solid rgba(201,169,110,0.2);border-radius:var(--radius-sm);padding:11px 15px;margin-bottom:1.25rem;font-size:12px;color:var(--text2);line-height:1.6}
+  .tip-box strong{color:var(--accent)}
+  .sec-title{font-size:11px;font-weight:600;letter-spacing:0.08em;color:var(--text3);text-transform:uppercase;margin:1.25rem 0 0.75rem;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:1.25rem}
+  .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:1.25rem}
+  .meal-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .meal-header{padding:9px 13px 7px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .meal-type{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em}
+  .meal-time{font-size:10px;color:var(--text3)}
+  .meal-body{padding:11px 13px}
+  .meal-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;line-height:1.3}
+  .meal-cuisine{margin-bottom:7px}
+  .meal-desc{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:9px}
+  .macros{display:flex;gap:5px;flex-wrap:wrap}
+  .macro{font-size:10px;padding:2px 6px;border-radius:8px;font-weight:500}
+  .m-p{background:rgba(122,179,224,0.12);color:var(--blue)}
+  .m-c{background:rgba(224,176,96,0.12);color:var(--amber)}
+  .m-f{background:rgba(94,207,176,0.12);color:var(--teal)}
+  .m-k{background:rgba(255,255,255,0.06);color:var(--text2)}
+  .m-slow{background:rgba(224,127,160,0.12);color:var(--pink);font-size:10px}
+  .cb-me{background:rgba(224,127,160,0.1);color:var(--pink);font-size:10px;padding:2px 7px;border-radius:6px;font-weight:500}
+  .cb-ic{background:rgba(224,176,96,0.1);color:var(--amber);font-size:10px;padding:2px 7px;border-radius:6px;font-weight:500}
+  .cb-jp{background:rgba(94,207,176,0.1);color:var(--teal);font-size:10px;padding:2px 7px;border-radius:6px;font-weight:500}
+  .shop-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:7px;margin-bottom:1.25rem}
+  .shop-item{background:var(--surface2);border-radius:var(--radius-sm);padding:8px 11px}
+  .shop-name{font-weight:500;color:var(--text);font-size:12px}
+  .shop-detail{color:var(--text2);font-size:11px;margin-top:2px}
+  .shop-where{font-size:10px;color:var(--text3);margin-top:2px}
+  .day-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .day-header{padding:9px 12px;border-bottom:1px solid var(--border)}
+  .day-name{font-size:12px;font-weight:600;color:var(--text)}
+  .day-sub{font-size:10px;color:var(--text3);margin-top:2px}
+  .day-body{padding:8px 12px}
+  .day-row{font-size:11px;color:var(--text2);padding:4px 0;border-bottom:1px solid var(--border);line-height:1.4}
+  .day-row:last-child{border-bottom:none}
+  .day-row strong{color:var(--text);font-weight:500}
+  .ex-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)}
+  .ex-item:last-child{border-bottom:none}
+  .ex-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
+  .ex-info{flex:1;min-width:0}
+  .ex-name{font-size:12px;color:var(--text);line-height:1.3}
+  .ex-detail{font-size:11px;color:var(--text3);margin-top:1px}
+  .dot-back{background:var(--blue)}
+  .dot-arms{background:var(--pink)}
+  .dot-glute{background:var(--teal)}
+  .dot-core{background:var(--amber)}
+  .dot-cardio{background:#888}
+  .dot-rest{background:#333}
+  .ex-sec{font-size:10px;font-weight:600;letter-spacing:0.07em;color:var(--text3);text-transform:uppercase;padding:5px 14px 3px;background:var(--surface2)}
+  .dbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid var(--border)}
+  .dtitle{font-size:15px;font-weight:500;color:var(--text)}
+  .workout-pill{font-size:11px;padding:3px 10px;border-radius:10px;background:rgba(122,179,224,0.12);color:var(--blue);font-weight:500}
+  ::-webkit-scrollbar{width:4px;height:4px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:4px}
+  @media(max-width:600px){.hero-title{font-size:22px}.section{padding:1.5rem 1rem}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-brand">My Wellness</div>
+  <button class="nav-btn active" onclick="showSection('home',this)">Home</button>
+  <button class="nav-btn" onclick="showSection('fitness',this)">Fitness</button>
+  <button class="nav-btn" onclick="showSection('meals',this)">Meals</button>
+  <button class="nav-btn" onclick="showSection('skincare',this)">Skincare</button>
+  <button class="nav-btn" onclick="showSection('shopping',this)">Shopping</button>
+</nav>
+
+<!-- HOME -->
+<div id="home" class="section active">
+  <div class="hero">
+    <div class="hero-label">Your wellness planner</div>
+    <div class="hero-title">Everything in<br><em>one place.</em></div>
+    <div class="hero-sub">Fitness · Nutrition · Skincare · Body care · Hair care</div>
+    <div class="hero-pills">
+      <span class="hero-pill">5 workouts/week</span>
+      <span class="hero-pill">Fat loss + toning</span>
+      <span class="hero-pill">4-week meal rotation</span>
+      <span class="hero-pill">Middle Eastern · Indo-Chinese · Japanese</span>
+      <span class="hero-pill">AM + PM skincare</span>
+      <span class="hero-pill">Relaxed 4C hair</span>
+    </div>
+  </div>
+  <div class="tip-box"><strong>How to use:</strong> Navigate with the menu above. Fitness has your full weekly split. Meals has 4 weeks of standalone dinners and lunches with shopping lists. Skincare covers your complete face, body and hair routine. Shopping is a quick-access weekly list.</div>
+  <div class="sec-title">Weekly overview</div>
+  <div class="grid-3">
+    <div class="day-card"><div class="day-header"><div class="day-name">Monday</div><div class="day-sub">Pilates + abs</div></div><div class="day-body">
+      <div class="day-row"><strong>Workout:</strong> Light arms, shoulders, core</div>
+      <div class="day-row"><strong>Shower:</strong> Glow Getter wash</div>
+      <div class="day-row"><strong>AM body:</strong> Olay Vit C · AHA deo</div>
+      <div class="day-row"><strong>PM skin:</strong> Finacea + TO Glycolic + Retinol lotion</div>
+    </div></div>
+    <div class="day-card"><div class="day-header"><div class="day-name">Tuesday</div><div class="day-sub">Back + arms</div></div><div class="day-body">
+      <div class="day-row"><strong>Workout:</strong> Lat pulls, rows, face pulls, arms</div>
+      <div class="day-row"><strong>Shower:</strong> Glycolic acid wash</div>
+      <div class="day-row"><strong>AM body:</strong> Olay Vit C · AHA deo</div>
+      <div class="day-row"><strong>PM skin:</strong> Retinol face · body butter only</div>
+    </div></div>
+    <div class="day-card"><div class="day-header"><div class="day-name">Wednesday</div><div class="day-sub">Glutes + lower body</div></div><div class="day-body">
+      <div class="day-row"><strong>Workout:</strong> KAS bridges, RDL, leg press</div>
+      <div class="day-row"><strong>Shower:</strong> Glow Getter wash · hair wash day</div>
+      <div class="day-row"><strong>AM body:</strong> Olay Vit C · AHA deo</div>
+      <div class="day-row"><strong>PM skin:</strong> Finacea + TO Glycolic + body butter</div>
+    </div></div>
+    <div class="day-card"><div class="day-header"><div class="day-name">Thursday</div><div class="day-sub">Full body + cardio</div></div><div class="day-body">
+      <div class="day-row"><strong>Workout:</strong> Glutes, rows, 20–25 min cardio</div>
+      <div class="day-row"><strong>Shower:</strong> Glycolic acid wash</div>
+      <div class="day-row"><strong>AM body:</strong> Olay Vit C · AHA deo</div>
+      <div class="day-row"><strong>PM skin:</strong> Retinol face + Retinol body lotion</div>
+    </div></div>
+    <div class="day-card"><div class="day-header"><div class="day-name">Friday</div><div class="day-sub">Back + shoulders</div></div><div class="day-body">
+      <div class="day-row"><strong>Workout:</strong> Lat pulls, rows, Arnold press</div>
+      <div class="day-row"><strong>Shower:</strong> Glow Getter wash</div>
+      <div class="day-row"><strong>AM body:</strong> Olay Vit C · AHA deo</div>
+      <div class="day-row"><strong>PM skin:</strong> Finacea · body butter only</div>
+    </div></div>
+    <div class="day-card"><div class="day-header"><div class="day-name">Sat & Sun</div><div class="day-sub">Active rest</div></div><div class="day-body">
+      <div class="day-row"><strong>Activity:</strong> Walk or hike</div>
+      <div class="day-row"><strong>Sunday hair:</strong> Full bond repair wash</div>
+      <div class="day-row"><strong>Shower:</strong> Sun — glycolic wash</div>
+      <div class="day-row"><strong>PM skin:</strong> Rest or light routine</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- FITNESS -->
+<div id="fitness" class="section">
+  <div class="hero">
+    <div class="hero-label">Fitness</div>
+    <div class="hero-title">Weekly workout split</div>
+    <div class="hero-sub">Fat loss · back · arms · glutes · fully optimised</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab(event,'f-mon','fitness')">Monday</button>
+    <button class="tab-btn" onclick="showTab(event,'f-tue','fitness')">Tuesday</button>
+    <button class="tab-btn" onclick="showTab(event,'f-wed','fitness')">Wednesday</button>
+    <button class="tab-btn" onclick="showTab(event,'f-thu','fitness')">Thursday</button>
+    <button class="tab-btn" onclick="showTab(event,'f-fri','fitness')">Friday</button>
+    <button class="tab-btn" onclick="showTab(event,'f-rest','fitness')">Sat &amp; Sun</button>
+  </div>
+  <div id="f-mon" class="tab-panel active">
+    <div class="dbar"><div class="dtitle">Monday</div><span class="workout-pill">Pilates-style arms + abs</span></div>
+    <div class="card"><div class="ex-sec">Shoulders</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-arms"></div><div class="ex-info"><div class="ex-name">Lateral raises (1kg dumbbell)</div><div class="ex-detail">3 × 15 — slow &amp; controlled</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-arms"></div><div class="ex-info"><div class="ex-name">Front raises (1kg dumbbell)</div><div class="ex-detail">3 × 12</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-arms"></div><div class="ex-info"><div class="ex-name">Rear-delt fly (1kg dumbbell)</div><div class="ex-detail">3 × 15 — hinge forward slightly</div></div></div>
+    </div></div>
+    <div class="card"><div class="ex-sec">Biceps &amp; Triceps</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-arms"></div><div class="ex-info"><div class="ex-name">Bicep curls (1kg dumbbell)</div><div class="ex-detail">3 × 15</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-arms"></div><div class="ex-info"><div class="ex-name">Hammer curls (1kg dumbbell)</div><div class="ex-detail">3 × 12 — targets brachialis</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-arms"></div><div class="ex-info"><div class="ex-name">Tricep overhead extension (1kg dumbbell)</div><div class="ex-detail">3 × 15</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-arms"></div><div class="ex-info"><div class="ex-name">Tricep kickbacks (1kg dumbbell)</div><div class="ex-detail">3 × 12 — squeeze at extension</div></div></div>
+    </div></div>
+    <div class="card"><div class="ex-sec">Core</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-core"></div><div class="ex-info"><div class="ex-name">Standing marches</div><div class="ex-detail">3 × 40 sec</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-core"></div><div class="ex-info"><div class="ex-name">Dead bugs</div><div class="ex-detail">3 × 10 each side</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-core"></div><div class="ex-info"><div class="ex-name">Pilates toe taps</div><div class="ex-detail">3 × 12 each side</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-core"></div><div class="ex-info"><div class="ex-name">Pilates single-leg stretch</div><div class="ex-detail">3 × 10 each side</div></div></div>
+    </div></div>
+  </div>
+  <div id="f-tue" class="tab-panel">
+    <div class="dbar"><div class="dtitle">Tuesday</div><span class="workout-pill">Back + arms (strength)</span></div>
+    <div class="card"><div class="ex-sec">Back — Width</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-back"></div><div class="ex-info"><div class="ex-name">Lat pulldowns</div><div class="ex-detail">4 × 10–12 — full stretch at top</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-back"></div><div class="ex-info"><div class="ex-name">Close-grip lat pulldown</div><div class="ex-detail">3 × 12 — hits lower lats</div></div></div>
+    </div></div>
+    <div class="card"><div class="ex-sec">Back — Thickness</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-back"></div><div class="ex-info"><div class="ex-name">Single arm cable rows</div><div class="ex-detail">4 × 12 each side</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-back"></div><div class="ex-info"><div class="ex-name">Face pulls</div><div class="ex-detail">3 × 15 — rear delts + rotator cuff</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-back"></div><div class="ex-info"><div class="ex-name">Straight-arm cable pulldown</div><div class="ex-detail">3 × 12 — isolates lats</div></div></div>
+    </div></div>
+    <div class="card"><div class="ex-sec">Arms</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-arms"></div><div class="ex-info"><div class="ex-name">Cable bicep curls</div><div class="ex-detail">3 × 12</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-arms"></div><div class="ex-info"><div class="ex-name">Hammer curls (dumbbell)</div><div class="ex-detail">3 × 10</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-arms"></div><div class="ex-info"><div class="ex-name">Tricep pushdowns (cable)</div><div class="ex-detail">3 × 12</div></div></div>
+    </div></div>
+  </div>
+  <div id="f-wed" class="tab-panel">
+    <div class="dbar"><div class="dtitle">Wednesday</div><span class="workout-pill">Glutes + lower body</span></div>
+    <div class="card"><div class="ex-sec">Glutes — Primary</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-glute"></div><div class="ex-info"><div class="ex-name">KAS glute bridges</div><div class="ex-detail">4 × 15 — slow eccentric</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-glute"></div><div class="ex-info"><div class="ex-name">Cable glute kickbacks</div><div class="ex-detail">4 × 15 each side</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-glute"></div><div class="ex-info"><div class="ex-name">Hip abduction machine</div><div class="ex-detail">3 × 15 — upper glute med</div></div></div>
+    </div></div>
+    <div class="card"><div class="ex-sec">Lower Body</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-glute"></div><div class="ex-info"><div class="ex-name">Leg press</div><div class="ex-detail">4 × 10–12 — feet high &amp; wide</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-glute"></div><div class="ex-info"><div class="ex-name">Romanian deadlift (RDL)</div><div class="ex-detail">3 × 10–12 — hinge at hips</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-glute"></div><div class="ex-info"><div class="ex-name">Lying hamstring curl</div><div class="ex-detail">3 × 12</div></div></div>
+    </div></div>
+    <div class="card"><div class="ex-sec">Core</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-core"></div><div class="ex-info"><div class="ex-name">Dead bugs</div><div class="ex-detail">3 × 10 each side</div></div></div>
+    </div></div>
+  </div>
+  <div id="f-thu" class="tab-panel">
+    <div class="dbar"><div class="dtitle">Thursday</div><span class="workout-pill">Full body + cardio burn</span></div>
+    <div class="card"><div class="ex-sec">Glutes + Legs</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-glute"></div><div class="ex-info"><div class="ex-name">KAS glute bridges</div><div class="ex-detail">3 × 15</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-glute"></div><div class="ex-info"><div class="ex-name">Leg press</div><div class="ex-detail">3 × 12 — feet high</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-glute"></div><div class="ex-info"><div class="ex-name">Cable glute kickbacks</div><div class="ex-detail">3 × 12 each side</div></div></div>
+    </div></div>
+    <div class="card"><div class="ex-sec">Back</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-back"></div><div class="ex-info"><div class="ex-name">Single arm cable rows</div><div class="ex-detail">3 × 12 each side</div></div></div>
+    </div></div>
+    <div class="card"><div class="ex-sec">Cardio</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-cardio"></div><div class="ex-info"><div class="ex-name">Incline treadmill walk or StairMaster</div><div class="ex-detail">20–25 min — steady pace</div></div></div>
+    </div></div>
+  </div>
+  <div id="f-fri" class="tab-panel">
+    <div class="dbar"><div class="dtitle">Friday</div><span class="workout-pill">Back + shoulders (strength)</span></div>
+    <div class="card"><div class="ex-sec">Back</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-back"></div><div class="ex-info"><div class="ex-name">Lat pulldowns</div><div class="ex-detail">4 × 10</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-back"></div><div class="ex-info"><div class="ex-name">Seated cable row</div><div class="ex-detail">3 × 12 — elbows tight</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-back"></div><div class="ex-info"><div class="ex-name">Face pulls</div><div class="ex-detail">3 × 15</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-back"></div><div class="ex-info"><div class="ex-name">Dumbbell bent-over row</div><div class="ex-detail">3 × 10 each side — mid-back focus</div></div></div>
+    </div></div>
+    <div class="card"><div class="ex-sec">Shoulders</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-arms"></div><div class="ex-info"><div class="ex-name">Arnold press (dumbbell)</div><div class="ex-detail">3 × 10–12</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-arms"></div><div class="ex-info"><div class="ex-name">Rear-delt fly (cable or dumbbell)</div><div class="ex-detail">3 × 15 — heavier than Monday</div></div></div>
+      <div class="ex-item"><div class="ex-dot dot-arms"></div><div class="ex-info"><div class="ex-name">Front raises (cable)</div><div class="ex-detail">3 × 12</div></div></div>
+    </div></div>
+    <div class="card"><div class="ex-sec">Core</div><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-core"></div><div class="ex-info"><div class="ex-name">Standing marches</div><div class="ex-detail">3 × 40 sec</div></div></div>
+    </div></div>
+  </div>
+  <div id="f-rest" class="tab-panel">
+    <div class="dbar"><div class="dtitle">Saturday &amp; Sunday</div><span class="workout-pill">Active rest</span></div>
+    <div class="tip-box">Your weekend walks and hikes are genuinely great for fat loss and recovery. Sunday is your main hair wash day.</div>
+    <div class="card"><div class="card-body">
+      <div class="ex-item"><div class="ex-dot dot-rest"></div><div class="ex-info"><div class="ex-name">Walk or hike at your own pace</div><div class="ex-detail">Both days — enjoy the movement</div></div></div>
+      <div class="ex-item"><div class="ex-dot" style="background:var(--teal)"></div><div class="ex-info"><div class="ex-name">Sunday: full hair wash routine</div><div class="ex-detail">Olaplex No.3 pre-wash (10–30 min) → bond shampoo → Living Proof → conditioner</div></div></div>
+    </div></div>
+    <div class="sec-title">Progressive overload reminders</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num num-gold">→</div><div class="step-info"><div class="step-product">Add weight when all sets feel comfortable</div><div class="step-note">Even 0.5–1kg more is meaningful. Small consistent increases drive results.</div></div></div>
+      <div class="step"><div class="step-num num-gold">→</div><div class="step-info"><div class="step-product">KAS bridges &amp; kickbacks: slow it down, squeeze at the top</div><div class="step-note">Mind-muscle connection matters more than load on isolation work.</div></div></div>
+      <div class="step"><div class="step-num num-gold">→</div><div class="step-info"><div class="step-product">Leg press: feet high &amp; wide = more glute activation</div><div class="step-note">Don't let knees cave inward on the press.</div></div></div>
+      <div class="step"><div class="step-num num-gold">→</div><div class="step-info"><div class="step-product">Protein target: 1.6–2g per kg bodyweight daily</div><div class="step-note">Essential for toning and recovery while in a calorie deficit.</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MEALS -->
+<div id="meals" class="section">
+  <div class="hero">
+    <div class="hero-label">Nutrition</div>
+    <div class="hero-title">4-week meal rotation</div>
+    <div class="hero-sub">2 people · every meal standalone · Middle Eastern, Indo-Chinese &amp; pseudo-Japanese</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab(event,'m-w1','meals')">Week 1</button>
+    <button class="tab-btn" onclick="showTab(event,'m-w2','meals')">Week 2</button>
+    <button class="tab-btn" onclick="showTab(event,'m-w3','meals')">Week 3</button>
+    <button class="tab-btn" onclick="showTab(event,'m-w4','meals')">Week 4</button>
+    <button class="tab-btn" onclick="showTab(event,'m-pantry','meals')">Pantry staples</button>
+  </div>
+
+  <div id="m-w1" class="tab-panel active">
+    <div class="sub-tabs">
+      <button class="sub-btn active" onclick="showSub(event,'w1mon','m-w1')">Mon</button>
+      <button class="sub-btn" onclick="showSub(event,'w1tue','m-w1')">Tue</button>
+      <button class="sub-btn" onclick="showSub(event,'w1wed','m-w1')">Wed</button>
+      <button class="sub-btn" onclick="showSub(event,'w1thu','m-w1')">Thu</button>
+      <button class="sub-btn" onclick="showSub(event,'w1fri','m-w1')">Fri</button>
+      <button class="sub-btn" onclick="showSub(event,'w1shop','m-w1')">Shopping</button>
+    </div>
+    <div id="w1mon" class="sub-panel active"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Chicken shawarma wraps</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Pre-marinated chicken thighs pan-fried with shawarma spices, in a wrap with tahini, cucumber and pickled chilli.</div><div class="macros"><span class="macro m-p">~42g protein</span><span class="macro m-c">~38g carbs</span><span class="macro m-k">~530 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">30 min</span></div><div class="meal-body"><div class="meal-name">Miso-glazed salmon with edamame rice</div><div class="meal-cuisine"><span class="cb-jp">Pseudo-Japanese</span></div><div class="meal-desc">Salmon baked with white miso, mirin and honey. Steamed rice stirred through with edamame and sesame oil.</div><div class="macros"><span class="macro m-p">~48g protein</span><span class="macro m-f">~22g fat</span><span class="macro m-k">~580 kcal</span></div></div></div>
+    </div></div>
+    <div id="w1tue" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Soy-ginger tuna rice bowl</div><div class="meal-cuisine"><span class="cb-jp">Pseudo-Japanese</span></div><div class="meal-desc">Fresh or tinned tuna with soy, ginger and sesame over rice, topped with nori, spring onion and soft-boiled egg.</div><div class="macros"><span class="macro m-p">~50g protein</span><span class="macro m-c">~40g carbs</span><span class="macro m-k">~520 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">35 min</span></div><div class="meal-body"><div class="meal-name">Za'atar chicken thighs with hummus &amp; roasted veg</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Chicken thighs rubbed with za'atar and lemon, pan-seared and oven-finished. Served over roasted cauliflower with hummus.</div><div class="macros"><span class="macro m-p">~48g protein</span><span class="macro m-c">~20g carbs</span><span class="macro m-k">~530 kcal</span></div></div></div>
+    </div></div>
+    <div id="w1wed" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">15 min</span></div><div class="meal-body"><div class="meal-name">Chilli-soy turkey lettuce cups</div><div class="meal-cuisine"><span class="cb-ic">Indo-Chinese</span></div><div class="meal-desc">Turkey mince stir-fried with garlic, ginger, soy, chilli and rice vinegar. Gem lettuce cups with chilli oil and spring onion.</div><div class="macros"><span class="macro m-p">~45g protein</span><span class="macro m-c">~8g carbs</span><span class="macro m-k">~380 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">30 min</span></div><div class="meal-body"><div class="meal-name">Indo-Chinese chilli chicken with egg-fried rice</div><div class="meal-cuisine"><span class="cb-ic">Indo-Chinese</span></div><div class="meal-desc">Crispy chicken thighs in a punchy Kashmiri chilli, soy, vinegar and garlic sauce. Proper egg-fried rice with spring onion.</div><div class="macros"><span class="macro m-p">~46g protein</span><span class="macro m-c">~42g carbs</span><span class="macro m-k">~560 kcal</span></div></div></div>
+    </div></div>
+    <div id="w1thu" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Tiger prawn &amp; sesame soba salad</div><div class="meal-cuisine"><span class="cb-jp">Pseudo-Japanese</span></div><div class="meal-desc">Cooked tiger prawns tossed with soba noodles, sesame oil, soy, cucumber and spring onion.</div><div class="macros"><span class="macro m-p">~40g protein</span><span class="macro m-c">~36g carbs</span><span class="macro m-k">~490 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">35 min</span></div><div class="meal-body"><div class="meal-name">Persian chicken thighs with saffron &amp; pearl barley</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Chicken thighs braised with saffron, turmeric, lemon and onion. Pearl barley for slow-release energy post-cardio.</div><div class="macros"><span class="macro m-p">~48g protein</span><span class="macro m-c">~38g carbs</span><span class="macro m-k">~540 kcal</span></div></div></div>
+    </div></div>
+    <div id="w1fri" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Pork mince dan dan noodles</div><div class="meal-cuisine"><span class="cb-ic">Indo-Chinese</span></div><div class="meal-desc">Pork mince with chilli bean paste, Chinese cooking wine, soy and ginger over noodles with sesame-chilli oil.</div><div class="macros"><span class="macro m-p">~40g protein</span><span class="macro m-c">~44g carbs</span><span class="macro m-k">~560 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">35 min</span></div><div class="meal-body"><div class="meal-name">Lamb kofta with pearl barley tabbouleh</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Spiced lamb kofta grilled or baked, with pearl barley tabbouleh — parsley, mint, tomato, lemon. Red meat slot.</div><div class="macros"><span class="macro m-p">~44g protein</span><span class="macro m-c">~34g carbs</span><span class="macro m-k">~580 kcal</span></div></div></div>
+    </div></div>
+    <div id="w1shop" class="sub-panel">
+      <div class="tip-box"><strong>Week 1 — est. £60–72</strong> for 2 people · 5 dinners + 5 standalone lunches</div>
+      <div class="sec-title">Butcher</div><div class="shop-grid">
+        <div class="shop-item"><div class="shop-name">Chicken thighs, boneless ~1.4kg</div><div class="shop-detail">Mon, Tue, Wed &amp; Thu</div></div>
+        <div class="shop-item"><div class="shop-name">Turkey mince ~500g</div><div class="shop-detail">Wed lunch</div></div>
+        <div class="shop-item"><div class="shop-name">Lamb mince ~500g</div><div class="shop-detail">Fri dinner kofta</div></div>
+        <div class="shop-item"><div class="shop-name">Pork mince ~400g</div><div class="shop-detail">Fri lunch dan dan</div></div>
+      </div>
+      <div class="sec-title">Fish — Waitrose or butcher</div><div class="shop-grid">
+        <div class="shop-item"><div class="shop-name">Salmon fillets ~350g</div><div class="shop-detail">Mon dinner (2 fillets)</div></div>
+        <div class="shop-item"><div class="shop-name">Tuna — 2 tins or ~300g fresh</div><div class="shop-detail">Tue lunch</div></div>
+        <div class="shop-item"><div class="shop-name">Tiger prawns, raw ~400g</div><div class="shop-detail">Thu lunch</div></div>
+      </div>
+      <div class="sec-title">Extras</div><div class="shop-grid">
+        <div class="shop-item"><div class="shop-name">White miso paste</div><div class="shop-detail">Mon dinner · Whole Foods</div></div>
+        <div class="shop-item"><div class="shop-name">Za'atar</div><div class="shop-detail">Tue dinner · Waitrose</div></div>
+        <div class="shop-item"><div class="shop-name">Saffron (small pack)</div><div class="shop-detail">Thu dinner · Waitrose</div></div>
+        <div class="shop-item"><div class="shop-name">Pearl barley (1 bag)</div><div class="shop-detail">Thu dinner + Fri tabbouleh</div></div>
+        <div class="shop-item"><div class="shop-name">Soba noodles (1 pack)</div><div class="shop-detail">Thu lunch</div></div>
+        <div class="shop-item"><div class="shop-name">Edamame, frozen</div><div class="shop-detail">Mon dinner · Waitrose/M&amp;S</div></div>
+        <div class="shop-item"><div class="shop-name">Nori sheets</div><div class="shop-detail">Tue lunch · Whole Foods</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="m-w2" class="tab-panel">
+    <div class="sub-tabs">
+      <button class="sub-btn active" onclick="showSub(event,'w2mon','m-w2')">Mon</button>
+      <button class="sub-btn" onclick="showSub(event,'w2tue','m-w2')">Tue</button>
+      <button class="sub-btn" onclick="showSub(event,'w2wed','m-w2')">Wed</button>
+      <button class="sub-btn" onclick="showSub(event,'w2thu','m-w2')">Thu</button>
+      <button class="sub-btn" onclick="showSub(event,'w2fri','m-w2')">Fri</button>
+      <button class="sub-btn" onclick="showSub(event,'w2shop','m-w2')">Shopping</button>
+    </div>
+    <div id="w2mon" class="sub-panel active"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Spiced lamb flatbread</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Fresh lamb mince with cumin, coriander and pomegranate molasses on toasted flatbread with yoghurt and mint.</div><div class="macros"><span class="macro m-p">~38g protein</span><span class="macro m-c">~35g carbs</span><span class="macro m-k">~540 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">35 min</span></div><div class="meal-body"><div class="meal-name">Tiger prawn &amp; miso ramen</div><div class="meal-cuisine"><span class="cb-jp">Pseudo-Japanese</span></div><div class="meal-desc">Tiger prawns in a rich miso-dashi broth with ramen noodles, soft-boiled egg, nori and spring onion.</div><div class="macros"><span class="macro m-p">~44g protein</span><span class="macro m-f">~14g fat</span><span class="macro m-k">~520 kcal</span></div></div></div>
+    </div></div>
+    <div id="w2tue" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Salmon &amp; avocado soba salad</div><div class="meal-cuisine"><span class="cb-jp">Pseudo-Japanese</span></div><div class="meal-desc">Fresh salmon pan-fried and flaked over cold soba with avocado, cucumber and soy-sesame dressing.</div><div class="macros"><span class="macro m-p">~44g protein</span><span class="macro m-f">~18g fat</span><span class="macro m-k">~520 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">40 min</span></div><div class="meal-body"><div class="meal-name">Poussin with sumac, preserved lemon &amp; herbs</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Spatchcocked poussin in sumac, preserved lemon, garlic and olive oil, roasted at high heat. Served with flatbread and labneh.</div><div class="macros"><span class="macro m-p">~52g protein</span><span class="macro m-f">~24g fat</span><span class="macro m-k">~580 kcal</span></div></div></div>
+    </div></div>
+    <div id="w2wed" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">15 min</span></div><div class="meal-body"><div class="meal-name">Chicken thigh &amp; tahini grain bowl</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Freshly cooked chicken thigh over pearl barley with tahini dressing, roasted red pepper and za'atar.</div><div class="macros"><span class="macro m-p">~46g protein</span><span class="macro m-c">~40g carbs</span><span class="macro m-k">~560 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">2.5 hrs hands-off</span></div><div class="meal-body"><div class="meal-name">Soy-braised beef short ribs with jasmine rice</div><div class="meal-cuisine"><span class="cb-ic">Indo-Chinese</span></div><div class="meal-desc">Short ribs braised in soy, oyster sauce, Chinese cooking wine, star anise and ginger. Start at 6pm, eat at 8:30.</div><div class="macros"><span class="macro m-p">~50g protein</span><span class="macro m-f">~28g fat</span><span class="macro m-k">~680 kcal</span></div><div style="margin-top:6px"><span class="macro m-slow">Slow cook — hands-off</span></div></div></div>
+    </div></div>
+    <div id="w2thu" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Turkey mince &amp; ginger congee</div><div class="meal-cuisine"><span class="cb-jp">Pseudo-Japanese</span></div><div class="meal-desc">Turkey mince cooked into a rice congee with ginger, soy and sesame oil. Topped with crispy shallots and spring onion.</div><div class="macros"><span class="macro m-p">~44g protein</span><span class="macro m-c">~35g carbs</span><span class="macro m-k">~480 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">35 min</span></div><div class="meal-body"><div class="meal-name">Chicken thigh adana skewers with bulgur</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Minced chicken thigh with Turkish spices on skewers, grilled. Served with bulgur wheat and a tomato-herb salad.</div><div class="macros"><span class="macro m-p">~46g protein</span><span class="macro m-c">~36g carbs</span><span class="macro m-k">~540 kcal</span></div></div></div>
+    </div></div>
+    <div id="w2fri" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">15 min</span></div><div class="meal-body"><div class="meal-name">Pork mince &amp; prawn wonton soup</div><div class="meal-cuisine"><span class="cb-ic">Indo-Chinese</span></div><div class="meal-desc">Wontons with pork mince and prawns, soy and ginger, in a clear broth with chilli oil and spring onion.</div><div class="macros"><span class="macro m-p">~42g protein</span><span class="macro m-c">~36g carbs</span><span class="macro m-k">~490 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">3 hrs hands-off</span></div><div class="meal-body"><div class="meal-name">Char siu pork ribs with steamed rice</div><div class="meal-cuisine"><span class="cb-ic">Indo-Chinese</span></div><div class="meal-desc">Pork ribs in hoisin, Chinese cooking wine, soy, honey and five-spice, slow-roasted then caramelised under the grill.</div><div class="macros"><span class="macro m-p">~46g protein</span><span class="macro m-f">~26g fat</span><span class="macro m-k">~640 kcal</span></div><div style="margin-top:6px"><span class="macro m-slow">Slow cook — hands-off</span></div></div></div>
+    </div></div>
+    <div id="w2shop" class="sub-panel">
+      <div class="tip-box"><strong>Week 2 — est. £65–78</strong> · Short ribs and pork ribs are the premium cuts.</div>
+      <div class="sec-title">Butcher</div><div class="shop-grid">
+        <div class="shop-item"><div class="shop-name">Lamb mince ~400g</div><div class="shop-detail">Mon lunch</div></div>
+        <div class="shop-item"><div class="shop-name">Poussin (2 birds)</div><div class="shop-detail">Tue dinner</div></div>
+        <div class="shop-item"><div class="shop-name">Chicken thighs, boneless ~800g</div><div class="shop-detail">Wed lunch + Thu dinner</div></div>
+        <div class="shop-item"><div class="shop-name">Turkey mince ~400g</div><div class="shop-detail">Thu lunch congee</div></div>
+        <div class="shop-item"><div class="shop-name">Pork mince ~300g</div><div class="shop-detail">Fri lunch wontons</div></div>
+        <div class="shop-item"><div class="shop-name">Beef short ribs ~1kg</div><div class="shop-detail">Wed dinner</div></div>
+        <div class="shop-item"><div class="shop-name">Pork ribs (full rack) ~1.2kg</div><div class="shop-detail">Fri dinner char siu</div></div>
+      </div>
+      <div class="sec-title">Fish</div><div class="shop-grid">
+        <div class="shop-item"><div class="shop-name">Salmon fillet ~300g</div><div class="shop-detail">Tue lunch · Waitrose</div></div>
+        <div class="shop-item"><div class="shop-name">Tiger prawns, raw ~500g</div><div class="shop-detail">Mon dinner + Fri lunch wontons</div></div>
+      </div>
+      <div class="sec-title">Extras</div><div class="shop-grid">
+        <div class="shop-item"><div class="shop-name">Ramen noodles (1 pack)</div><div class="shop-detail">Mon dinner</div></div>
+        <div class="shop-item"><div class="shop-name">Sumac</div><div class="shop-detail">Tue dinner · Waitrose/Whole Foods</div></div>
+        <div class="shop-item"><div class="shop-name">Preserved lemons (1 jar)</div><div class="shop-detail">Tue dinner — keeps for months</div></div>
+        <div class="shop-item"><div class="shop-name">Star anise</div><div class="shop-detail">Wed short ribs</div></div>
+        <div class="shop-item"><div class="shop-name">Bulgur wheat (1 bag)</div><div class="shop-detail">Thu dinner adana</div></div>
+        <div class="shop-item"><div class="shop-name">Wonton wrappers (1 pack)</div><div class="shop-detail">Fri lunch · Whole Foods</div></div>
+        <div class="shop-item"><div class="shop-name">Hoisin sauce (1 jar)</div><div class="shop-detail">Fri char siu ribs</div></div>
+        <div class="shop-item"><div class="shop-name">Five-spice powder</div><div class="shop-detail">Fri ribs</div></div>
+        <div class="shop-item"><div class="shop-name">Labneh (1 tub)</div><div class="shop-detail">Tue dinner · Waitrose/M&amp;S</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="m-w3" class="tab-panel">
+    <div class="sub-tabs">
+      <button class="sub-btn active" onclick="showSub(event,'w3mon','m-w3')">Mon</button>
+      <button class="sub-btn" onclick="showSub(event,'w3tue','m-w3')">Tue</button>
+      <button class="sub-btn" onclick="showSub(event,'w3wed','m-w3')">Wed</button>
+      <button class="sub-btn" onclick="showSub(event,'w3thu','m-w3')">Thu</button>
+      <button class="sub-btn" onclick="showSub(event,'w3fri','m-w3')">Fri</button>
+      <button class="sub-btn" onclick="showSub(event,'w3shop','m-w3')">Shopping</button>
+    </div>
+    <div id="w3mon" class="sub-panel active"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Sesame prawn rice bowl</div><div class="meal-cuisine"><span class="cb-jp">Pseudo-Japanese</span></div><div class="meal-desc">Tiger prawns pan-fried in sesame oil, soy and ginger, over steamed rice with cucumber and toasted sesame.</div><div class="macros"><span class="macro m-p">~40g protein</span><span class="macro m-c">~38g carbs</span><span class="macro m-k">~480 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">2 hrs hands-off</span></div><div class="meal-body"><div class="meal-name">Five-spice duck legs with jasmine rice &amp; pak choi</div><div class="meal-cuisine"><span class="cb-ic">Indo-Chinese</span></div><div class="meal-desc">Duck legs slow-roasted with five-spice, soy, oyster sauce, Chinese cooking wine and ginger. Skin crisps, meat falls off the bone.</div><div class="macros"><span class="macro m-p">~50g protein</span><span class="macro m-f">~32g fat</span><span class="macro m-k">~660 kcal</span></div><div style="margin-top:6px"><span class="macro m-slow">Slow cook — hands-off</span></div></div></div>
+    </div></div>
+    <div id="w3tue" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Spiced chicken flatbread with labneh</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Freshly cooked spiced chicken thigh on toasted flatbread with labneh, sumac, cucumber and fresh mint.</div><div class="macros"><span class="macro m-p">~42g protein</span><span class="macro m-c">~32g carbs</span><span class="macro m-k">~510 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">35 min</span></div><div class="meal-body"><div class="meal-name">Tiger prawn chermoula with pearl barley</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Tiger prawns in chermoula — coriander, cumin, smoked paprika, lemon, garlic. Served over pearl barley with herby yoghurt.</div><div class="macros"><span class="macro m-p">~46g protein</span><span class="macro m-c">~36g carbs</span><span class="macro m-k">~510 kcal</span></div></div></div>
+    </div></div>
+    <div id="w3wed" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">15 min</span></div><div class="meal-body"><div class="meal-name">Pork mince mapo tofu with rice</div><div class="meal-cuisine"><span class="cb-ic">Indo-Chinese</span></div><div class="meal-desc">Pork mince with doubanjiang, soy, Chinese cooking wine, garlic and ginger with silken tofu. Bold and spicy.</div><div class="macros"><span class="macro m-p">~42g protein</span><span class="macro m-c">~38g carbs</span><span class="macro m-k">~550 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">30 min</span></div><div class="meal-body"><div class="meal-name">Salmon teriyaki with soba noodles</div><div class="meal-cuisine"><span class="cb-jp">Pseudo-Japanese</span></div><div class="meal-desc">Salmon glazed in homemade teriyaki (soy, mirin, honey), with soba noodles in sesame oil with cucumber.</div><div class="macros"><span class="macro m-p">~48g protein</span><span class="macro m-f">~20g fat</span><span class="macro m-k">~570 kcal</span></div></div></div>
+    </div></div>
+    <div id="w3thu" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Turkey &amp; soy glass noodle bowl</div><div class="meal-cuisine"><span class="cb-ic">Indo-Chinese</span></div><div class="meal-desc">Turkey mince stir-fried with soy, garlic, ginger and chilli over glass noodles with julienned cucumber and chilli oil.</div><div class="macros"><span class="macro m-p">~44g protein</span><span class="macro m-c">~36g carbs</span><span class="macro m-k">~490 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">2.5 hrs hands-off</span></div><div class="meal-body"><div class="meal-name">Slow-braised lamb shoulder with flatbread &amp; zhug</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Lamb shoulder braised with ras el hanout, tomato and chickpeas, shredded in warm flatbreads with zhug. Red meat slot.</div><div class="macros"><span class="macro m-p">~50g protein</span><span class="macro m-f">~28g fat</span><span class="macro m-k">~650 kcal</span></div><div style="margin-top:6px"><span class="macro m-slow">Slow cook — hands-off</span></div></div></div>
+    </div></div>
+    <div id="w3fri" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Tuna &amp; avocado temaki bowl</div><div class="meal-cuisine"><span class="cb-jp">Pseudo-Japanese</span></div><div class="meal-desc">Tuna with avocado, soy, sesame and pickled ginger over rice with nori strips. No cooking required.</div><div class="macros"><span class="macro m-p">~46g protein</span><span class="macro m-f">~16g fat</span><span class="macro m-k">~510 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">35 min</span></div><div class="meal-body"><div class="meal-name">Chicken thigh musakhan with flatbread &amp; pine nuts</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Chicken thighs slow-cooked with caramelised onion, sumac and olive oil, piled onto flatbread with toasted pine nuts.</div><div class="macros"><span class="macro m-p">~48g protein</span><span class="macro m-c">~34g carbs</span><span class="macro m-k">~580 kcal</span></div></div></div>
+    </div></div>
+    <div id="w3shop" class="sub-panel">
+      <div class="tip-box"><strong>Week 3 — est. £62–76</strong> · Duck legs are the star — buy 2 large ones.</div>
+      <div class="sec-title">Butcher</div><div class="shop-grid">
+        <div class="shop-item"><div class="shop-name">Duck legs (2 large)</div><div class="shop-detail">Mon dinner</div></div>
+        <div class="shop-item"><div class="shop-name">Chicken thighs, boneless ~800g</div><div class="shop-detail">Tue lunch + Fri dinner</div></div>
+        <div class="shop-item"><div class="shop-name">Pork mince ~500g</div><div class="shop-detail">Wed lunch mapo tofu</div></div>
+        <div class="shop-item"><div class="shop-name">Turkey mince ~400g</div><div class="shop-detail">Thu lunch</div></div>
+        <div class="shop-item"><div class="shop-name">Lamb shoulder, portioned ~900g</div><div class="shop-detail">Thu dinner slow braise</div></div>
+      </div>
+      <div class="sec-title">Fish</div><div class="shop-grid">
+        <div class="shop-item"><div class="shop-name">Tiger prawns, raw ~800g</div><div class="shop-detail">Mon lunch + Tue dinner chermoula</div></div>
+        <div class="shop-item"><div class="shop-name">Salmon fillets ~350g</div><div class="shop-detail">Wed dinner teriyaki</div></div>
+        <div class="shop-item"><div class="shop-name">Tuna — 2 tins or ~300g</div><div class="shop-detail">Fri lunch temaki bowl</div></div>
+      </div>
+      <div class="sec-title">Extras</div><div class="shop-grid">
+        <div class="shop-item"><div class="shop-name">Silken tofu (1 pack)</div><div class="shop-detail">Wed lunch · Whole Foods</div></div>
+        <div class="shop-item"><div class="shop-name">Doubanjiang paste (1 jar)</div><div class="shop-detail">Wed lunch — keeps months</div></div>
+        <div class="shop-item"><div class="shop-name">Soba noodles (1 pack)</div><div class="shop-detail">Wed dinner</div></div>
+        <div class="shop-item"><div class="shop-name">Glass noodles (1 pack)</div><div class="shop-detail">Thu lunch · Whole Foods</div></div>
+        <div class="shop-item"><div class="shop-name">Ras el hanout (1 jar)</div><div class="shop-detail">Thu lamb shoulder</div></div>
+        <div class="shop-item"><div class="shop-name">Tinned chickpeas (1 tin)</div><div class="shop-detail">Thu lamb braise</div></div>
+        <div class="shop-item"><div class="shop-name">Pine nuts (small bag)</div><div class="shop-detail">Fri musakhan · Waitrose/M&amp;S</div></div>
+        <div class="shop-item"><div class="shop-name">Labneh (1 tub)</div><div class="shop-detail">Tue lunch · Waitrose/M&amp;S</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="m-w4" class="tab-panel">
+    <div class="sub-tabs">
+      <button class="sub-btn active" onclick="showSub(event,'w4mon','m-w4')">Mon</button>
+      <button class="sub-btn" onclick="showSub(event,'w4tue','m-w4')">Tue</button>
+      <button class="sub-btn" onclick="showSub(event,'w4wed','m-w4')">Wed</button>
+      <button class="sub-btn" onclick="showSub(event,'w4thu','m-w4')">Thu</button>
+      <button class="sub-btn" onclick="showSub(event,'w4fri','m-w4')">Fri</button>
+      <button class="sub-btn" onclick="showSub(event,'w4shop','m-w4')">Shopping</button>
+    </div>
+    <div id="w4mon" class="sub-panel active"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Pork mince &amp; cucumber rice bowl</div><div class="meal-cuisine"><span class="cb-ic">Indo-Chinese</span></div><div class="meal-desc">Pork mince stir-fried with soy, garlic, ginger and Chinese cooking wine over rice with pickled cucumber and sesame.</div><div class="macros"><span class="macro m-p">~40g protein</span><span class="macro m-c">~38g carbs</span><span class="macro m-k">~510 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">35 min</span></div><div class="meal-body"><div class="meal-name">Harissa salmon with lemon couscous</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Salmon rubbed with rose harissa and roasted. Served over couscous with lemon, coriander, toasted almonds and yoghurt.</div><div class="macros"><span class="macro m-p">~48g protein</span><span class="macro m-f">~22g fat</span><span class="macro m-k">~580 kcal</span></div></div></div>
+    </div></div>
+    <div id="w4tue" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">15 min</span></div><div class="meal-body"><div class="meal-name">Chicken thigh &amp; pickled veg rice bowl</div><div class="meal-cuisine"><span class="cb-jp">Pseudo-Japanese</span></div><div class="meal-desc">Freshly cooked chicken thigh over steamed rice with quick-pickled cucumber, furikake and soy-sesame dressing.</div><div class="macros"><span class="macro m-p">~44g protein</span><span class="macro m-c">~40g carbs</span><span class="macro m-k">~530 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">40 min</span></div><div class="meal-body"><div class="meal-name">Poussin with za'atar, lemon &amp; roasted garlic</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Spatchcocked poussin rubbed with za'atar, lemon zest and roasted garlic, cooked at high heat. Serve with flatbread.</div><div class="macros"><span class="macro m-p">~52g protein</span><span class="macro m-f">~22g fat</span><span class="macro m-k">~560 kcal</span></div></div></div>
+    </div></div>
+    <div id="w4wed" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Turkey mince lettuce cups with hoisin</div><div class="meal-cuisine"><span class="cb-ic">Indo-Chinese</span></div><div class="meal-desc">Turkey mince with hoisin, soy, ginger and water chestnuts in gem lettuce cups with spring onion.</div><div class="macros"><span class="macro m-p">~44g protein</span><span class="macro m-c">~14g carbs</span><span class="macro m-k">~390 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">2 hrs hands-off</span></div><div class="meal-body"><div class="meal-name">Red-braised pork ribs with egg-fried rice</div><div class="meal-cuisine"><span class="cb-ic">Indo-Chinese</span></div><div class="meal-desc">Pork ribs braised in soy, Shaoxing wine, sugar and star anise — classic hong shao technique. Glossy and deeply savoury.</div><div class="macros"><span class="macro m-p">~46g protein</span><span class="macro m-f">~24g fat</span><span class="macro m-k">~650 kcal</span></div><div style="margin-top:6px"><span class="macro m-slow">Slow cook — hands-off</span></div></div></div>
+    </div></div>
+    <div id="w4thu" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">10 min</span></div><div class="meal-body"><div class="meal-name">Prawn &amp; miso soup with udon</div><div class="meal-cuisine"><span class="cb-jp">Pseudo-Japanese</span></div><div class="meal-desc">Tiger prawns in a light miso broth with udon noodles, silken tofu, spring onion and nori. Restorative post-cardio.</div><div class="macros"><span class="macro m-p">~42g protein</span><span class="macro m-c">~40g carbs</span><span class="macro m-k">~490 kcal</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">35 min</span></div><div class="meal-body"><div class="meal-name">Miso salmon with sesame spinach &amp; soba</div><div class="meal-cuisine"><span class="cb-jp">Pseudo-Japanese</span></div><div class="meal-desc">Salmon with white miso glaze, alongside soba noodles and sesame-dressed wilted spinach.</div><div class="macros"><span class="macro m-p">~50g protein</span><span class="macro m-f">~20g fat</span><span class="macro m-k">~560 kcal</span></div></div></div>
+    </div></div>
+    <div id="w4fri" class="sub-panel"><div class="grid-2">
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Lunch</span><span class="meal-time">2+ hrs hands-off</span></div><div class="meal-body"><div class="meal-name">Beef short rib ramen</div><div class="meal-cuisine"><span class="cb-ic">Indo-Chinese</span></div><div class="meal-desc">Short ribs braised in soy-ginger broth, shredded over ramen noodles with soft-boiled egg and spring onion. Start early.</div><div class="macros"><span class="macro m-p">~48g protein</span><span class="macro m-c">~42g carbs</span><span class="macro m-k">~640 kcal</span></div><div style="margin-top:6px"><span class="macro m-slow">Slow cook — hands-off</span></div></div></div>
+      <div class="meal-card"><div class="meal-header"><span class="meal-type">Dinner</span><span class="meal-time">35 min</span></div><div class="meal-body"><div class="meal-name">Lamb arayes with labneh &amp; zhug</div><div class="meal-cuisine"><span class="cb-me">Middle Eastern</span></div><div class="meal-desc">Spiced lamb mince stuffed into flatbread and griddled until caramelised. Served with labneh and zhug. Red meat slot.</div><div class="macros"><span class="macro m-p">~44g protein</span><span class="macro m-c">~30g carbs</span><span class="macro m-k">~580 kcal</span></div></div></div>
+    </div></div>
+    <div id="w4shop" class="sub-panel">
+      <div class="tip-box"><strong>Week 4 — est. £60–74</strong> · Two standalone braise dishes this week.</div>
+      <div class="sec-title">Butcher</div><div class="shop-grid">
+        <div class="shop-item"><div class="shop-name">Pork mince ~400g</div><div class="shop-detail">Mon lunch</div></div>
+        <div class="shop-item"><div class="shop-name">Chicken thighs, boneless ~600g</div><div class="shop-detail">Tue lunch + dinner</div></div>
+        <div class="shop-item"><div class="shop-name">Poussin (2 birds)</div><div class="shop-detail">Tue dinner</div></div>
+        <div class="shop-item"><div class="shop-name">Turkey mince ~400g</div><div class="shop-detail">Wed lunch</div></div>
+        <div class="shop-item"><div class="shop-name">Pork ribs (full rack) ~1.2kg</div><div class="shop-detail">Wed dinner hong shao</div></div>
+        <div class="shop-item"><div class="shop-name">Beef short ribs ~800g</div><div class="shop-detail">Fri lunch ramen</div></div>
+        <div class="shop-item"><div class="shop-name">Lamb mince ~500g</div><div class="shop-detail">Fri dinner arayes</div></div>
+      </div>
+      <div class="sec-title">Fish</div><div class="shop-grid">
+        <div class="shop-item"><div class="shop-name">Salmon fillets ~700g</div><div class="shop-detail">Mon dinner + Thu dinner</div></div>
+        <div class="shop-item"><div class="shop-name">Tiger prawns, raw ~400g</div><div class="shop-detail">Thu lunch udon soup</div></div>
+      </div>
+      <div class="sec-title">Extras</div><div class="shop-grid">
+        <div class="shop-item"><div class="shop-name">Rose harissa (1 jar)</div><div class="shop-detail">Mon dinner · Waitrose/M&amp;S</div></div>
+        <div class="shop-item"><div class="shop-name">Couscous (1 bag)</div><div class="shop-detail">Mon dinner</div></div>
+        <div class="shop-item"><div class="shop-name">Furikake (1 jar)</div><div class="shop-detail">Tue lunch · Whole Foods</div></div>
+        <div class="shop-item"><div class="shop-name">Udon noodles (1 pack)</div><div class="shop-detail">Thu lunch</div></div>
+        <div class="shop-item"><div class="shop-name">Soba noodles (1 pack)</div><div class="shop-detail">Thu dinner</div></div>
+        <div class="shop-item"><div class="shop-name">Ramen noodles (1 pack)</div><div class="shop-detail">Fri lunch</div></div>
+        <div class="shop-item"><div class="shop-name">Labneh (1 tub)</div><div class="shop-detail">Fri dinner · Waitrose/M&amp;S</div></div>
+        <div class="shop-item"><div class="shop-name">Silken tofu (1 pack)</div><div class="shop-detail">Thu lunch</div></div>
+        <div class="shop-item"><div class="shop-name">Toasted almonds (small bag)</div><div class="shop-detail">Mon dinner couscous</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="m-pantry" class="tab-panel">
+    <div class="tip-box"><strong>One-off pantry shop</strong> — buy at the start of the month. Your Chinese cooking wine, oyster sauce, soy and vinegars are already covered.</div>
+    <div class="sec-title">Sauces &amp; pastes</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">White miso paste</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Mirin</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Hoisin sauce</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Doubanjiang / chilli bean paste</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Pomegranate molasses</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Preserved lemons</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Tahini</div><div class="shop-where">Waitrose / Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Rose harissa</div><div class="shop-where">Waitrose / M&amp;S</div></div>
+    </div>
+    <div class="sec-title">Spices</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Za'atar</div><div class="shop-where">Waitrose / M&amp;S</div></div>
+      <div class="shop-item"><div class="shop-name">Sumac</div><div class="shop-where">Waitrose / Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Ras el hanout</div><div class="shop-where">Waitrose / M&amp;S</div></div>
+      <div class="shop-item"><div class="shop-name">Five-spice powder</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Star anise</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Kashmiri chilli powder</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Saffron</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Smoked paprika</div><div class="shop-where">Waitrose</div></div>
+    </div>
+    <div class="sec-title">Grains &amp; noodles</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Pearl barley</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Soba noodles (2–3 packs)</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Ramen noodles (2 packs)</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Udon noodles</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Glass noodles</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Nori sheets</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Wonton wrappers</div><div class="shop-where">Whole Foods — freeze remainder</div></div>
+      <div class="shop-item"><div class="shop-name">Furikake seasoning</div><div class="shop-where">Whole Foods</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SKINCARE -->
+<div id="skincare" class="section">
+  <div class="hero">
+    <div class="hero-label">Skincare &amp; body care</div>
+    <div class="hero-title">Your full routine</div>
+    <div class="hero-sub">Face · body · shower · hair — all mapped to your week</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab(event,'sk-am','skincare')">AM face</button>
+    <button class="tab-btn" onclick="showTab(event,'sk-pm','skincare')">PM face</button>
+    <button class="tab-btn" onclick="showTab(event,'sk-body','skincare')">Body</button>
+    <button class="tab-btn" onclick="showTab(event,'sk-shower','skincare')">In-shower</button>
+    <button class="tab-btn" onclick="showTab(event,'sk-week','skincare')">Weekly schedule</button>
+    <button class="tab-btn" onclick="showTab(event,'sk-rules','skincare')">Rules</button>
+  </div>
+
+  <div id="sk-am" class="tab-panel active">
+    <div class="tip-box"><strong>Morning routine —</strong> after your AM shower, or after your post-gym shower on training days. Do your face routine after you've stepped out and towel-dried.</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num num-gold">1</div><div class="step-info"><div class="step-product">Dokdo Cleanser <span class="badge b-gold">double cleanse if you wore SPF overnight</span></div><div class="step-note">Dokdo Cleansing Oil first if needed, then Cleanser. Otherwise just the cleanser alone in the AM.</div></div></div>
+      <div class="step"><div class="step-num num-gold">2</div><div class="step-info"><div class="step-product">Equalberry Swimming Pool Toner <span class="badge b-teal">AM only</span></div><div class="step-note">Pat in while skin is still slightly damp. Preps and brightens — this is your AM toner only.</div></div></div>
+      <div class="step"><div class="step-num num-gold">3</div><div class="step-info"><div class="step-product">Innisfree Green Tea Vitamin C Serum</div><div class="step-note">Your antioxidant protection for the day. Press in gently — don't rub.</div></div></div>
+      <div class="step"><div class="step-num num-gold">4</div><div class="step-info"><div class="step-product">Topical Faded Serum <span class="badge b-warn">wait 1–2 min after Vit C</span></div><div class="step-note">Hyperpigmentation treatment. Works synergistically with Vitamin C in the morning.</div></div></div>
+      <div class="step"><div class="step-num num-gold">5</div><div class="step-info"><div class="step-product">Bubble Vitamin C Eye Cream</div><div class="step-note">Tap gently around the orbital bone with your ring finger — never drag.</div></div></div>
+      <div class="step"><div class="step-num num-gold">6</div><div class="step-info"><div class="step-product">Purito Bamboo Panthenol Cream</div><div class="step-note">Lightweight AM moisturiser. Lighter finish under SPF than the Atobarrier — save that one for PM.</div></div></div>
+      <div class="step"><div class="step-num num-warn">7</div><div class="step-info"><div class="step-product">Sunscreen <span class="badge b-warn">never skip</span></div><div class="step-note">Last step every single morning. Vitamin C, Faded, Finacea and glycolic all increase photosensitivity — SPF is non-negotiable.</div></div></div>
+    </div>
+  </div>
+
+  <div id="sk-pm" class="tab-panel">
+    <div class="tip-box"><strong>Evening routine —</strong> after your evening shower, or standalone if no second shower. Alternate Finacea and Retinol — never use both on the same night.</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num num-gold">1</div><div class="step-info"><div class="step-product">Dokdo Cleansing Oil → Dokdo Cleanser</div><div class="step-note">Full double cleanse every evening. Oil cleanser dissolves SPF and buildup; water-based cleanser cleans the skin itself.</div></div></div>
+      <div class="step"><div class="step-num num-gold">2</div><div class="step-info"><div class="step-product">Byoma Milky Toner <span class="badge b-pink">PM only</span></div><div class="step-note">Pat in while damp. Barrier-supporting and soothing — primes skin before actives.</div></div></div>
+      <div class="step"><div class="step-num num-gold">3</div><div class="step-info"><div class="step-product">Beta-Glucan Barrier Serum <span class="badge b-pink">PM only</span></div><div class="step-note">Calming and barrier-repairing. Let it absorb fully before adding actives.</div></div></div>
+      <div class="step"><div class="step-num num-warn">4a</div><div class="step-info"><div class="step-product">Finacea 15% Gel <span class="badge b-warn">alternate nights</span></div><div class="step-note">Azelaic acid for hyperpigmentation and clarity. Use on nights you are NOT using retinol. Thin layer — don't overdo it.</div></div></div>
+      <div class="step"><div class="step-num num-warn">4b</div><div class="step-info"><div class="step-product">Medik8 Retinol <span class="badge b-warn">alternate nights</span></div><div class="step-note">Use on nights you are NOT using Finacea. Never both on the same night. If skin feels sensitised, take a rest night.</div></div></div>
+      <div class="step"><div class="step-num num-gold">5</div><div class="step-info"><div class="step-product">Bubble Vitamin C Eye Cream</div><div class="step-note">Fine AM and PM both.</div></div></div>
+      <div class="step"><div class="step-num num-gold">6</div><div class="step-info"><div class="step-product">Aestura Atobarrier365 Cream <span class="badge b-pink">PM only</span></div><div class="step-note">Richer than the Purito — seals evening actives and supports overnight barrier repair.</div></div></div>
+    </div>
+  </div>
+
+  <div id="sk-body" class="tab-panel">
+    <div class="sec-title">AM body — every day post-shower</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num num-teal">1</div><div class="step-info"><div class="step-product">Olay Vitamin C Body Lotion</div><div class="step-note">Apply to damp skin immediately after towel drying — boosts absorption and locks in moisture. Every morning without exception.</div></div></div>
+      <div class="step"><div class="step-num num-teal">2</div><div class="step-info"><div class="step-product">Saltair AHA Deodorant</div><div class="step-note">After the lotion has absorbed. The AHA works on underarm texture and darkening over time — a smart multitasker.</div></div></div>
+    </div>
+    <div class="sec-title">PM body — 2–3 nights per week</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num num-warn">1</div><div class="step-info"><div class="step-product">The Ordinary Glycolic Acid Toner <span class="badge b-warn">on non-glycolic-wash days only</span></div><div class="step-note">Apply to clean dry skin on legs, arms, décolletage. Never use on days you've already used the Glycolic Acid body wash in the shower.</div></div></div>
+      <div class="step"><div class="step-num num-warn">2</div><div class="step-info"><div class="step-product">Saltair Retinol Body Lotion <span class="badge b-warn">2–3x/week · PM only</span></div><div class="step-note">After glycolic has absorbed (5 min). Upper arms, thighs, décolletage. Don't use on glycolic-wash days either.</div></div></div>
+      <div class="step"><div class="step-num num-teal">3</div><div class="step-info"><div class="step-product">Saltair Body Butter <span class="badge b-teal">every night</span></div><div class="step-note">On active nights: after retinol. On rest nights: straight after Olay if you need extra moisture. Use every single night.</div></div></div>
+    </div>
+  </div>
+
+  <div id="sk-shower" class="tab-panel">
+    <div class="tip-box"><strong>Body wash rotation —</strong> use these deliberately, not randomly. The Dove bar is for sensitive areas only. Your gym showers count — use the right wash on the right day.</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num num-teal">A</div><div class="step-info"><div class="step-product">Naturium Glycolic Acid Body Wash <span class="badge b-warn">2–3x/week max</span></div><div class="step-note">Your exfoliating wash. Use on days when you will NOT also apply TO Glycolic Acid toner or Retinol lotion in the evening. Great for texture, KP and body hyperpigmentation.</div></div></div>
+      <div class="step"><div class="step-num num-teal">B</div><div class="step-info"><div class="step-product">Naturium Glow Getter Multi-Oil Body Wash <span class="badge b-green">alternate days</span></div><div class="step-note">Your nourishing non-exfoliating wash. Use on days you plan to apply TO Glycolic Acid or Retinol body lotion in the evening — so you're not layering exfoliation.</div></div></div>
+      <div class="step"><div class="step-num num-teal">C</div><div class="step-info"><div class="step-product">Dove Beauty Bar <span class="badge b-teal">targeted use only</span></div><div class="step-note">Sensitive and intimate areas only. The active washes are too strong for daily use there.</div></div></div>
+    </div>
+    <div class="sec-title">Hair — wash days</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num num-gold">Sun</div><div class="step-info"><div class="step-product">Main wash day — full bond repair</div><div class="step-note">Olaplex No.3 pre-wash (10–30 min before) → bond maintenance shampoo → Living Proof bond treatment → conditioner. Your full repair and strengthen session.</div></div></div>
+      <div class="step"><div class="step-num num-gold">Wed</div><div class="step-info"><div class="step-product">Second wash day — hydration focus</div><div class="step-note">Briogeo Don't Despair Repair Moisture Shampoo → Gisou Honey Gloss Ceramide Conditioner. Scalp health, no bond treatments needed. Follow with leave-in and seal.</div></div></div>
+    </div>
+  </div>
+
+  <div id="sk-week" class="tab-panel">
+    <div class="tip-box"><strong>Golden rule:</strong> never use the Glycolic Acid body wash AND the TO Glycolic Acid toner on the same day. One exfoliation source per day for the body.</div>
+    <div class="grid-3">
+      <div class="day-card"><div class="day-header"><div class="day-name">Monday</div><div class="day-sub">Pilates + gym shower</div></div><div class="day-body">
+        <div class="day-row"><strong>Wash:</strong> Glow Getter oil wash</div>
+        <div class="day-row"><strong>AM body:</strong> Olay Vit C · AHA deo</div>
+        <div class="day-row"><strong>PM body:</strong> TO Glycolic + Retinol lotion + Body butter</div>
+        <div class="day-row"><strong>Face PM:</strong> Finacea night</div>
+      </div></div>
+      <div class="day-card"><div class="day-header"><div class="day-name">Tuesday</div><div class="day-sub">Back + arms · gym shower</div></div><div class="day-body">
+        <div class="day-row"><strong>Wash:</strong> Glycolic acid wash</div>
+        <div class="day-row"><strong>AM body:</strong> Olay Vit C · AHA deo</div>
+        <div class="day-row"><strong>PM body:</strong> Body butter only</div>
+        <div class="day-row"><strong>Face PM:</strong> Retinol night</div>
+      </div></div>
+      <div class="day-card"><div class="day-header"><div class="day-name">Wednesday</div><div class="day-sub">Glutes · gym shower · hair wash</div></div><div class="day-body">
+        <div class="day-row"><strong>Wash:</strong> Glow Getter oil wash</div>
+        <div class="day-row"><strong>Hair:</strong> Briogeo + Gisou (2nd wash day)</div>
+        <div class="day-row"><strong>AM body:</strong> Olay Vit C · AHA deo</div>
+        <div class="day-row"><strong>PM body:</strong> TO Glycolic + Body butter</div>
+        <div class="day-row"><strong>Face PM:</strong> Finacea night</div>
+      </div></div>
+      <div class="day-card"><div class="day-header"><div class="day-name">Thursday</div><div class="day-sub">Full body + cardio · gym shower</div></div><div class="day-body">
+        <div class="day-row"><strong>Wash:</strong> Glycolic acid wash</div>
+        <div class="day-row"><strong>AM body:</strong> Olay Vit C · AHA deo</div>
+        <div class="day-row"><strong>PM body:</strong> Retinol lotion + Body butter</div>
+        <div class="day-row"><strong>Face PM:</strong> Retinol night</div>
+      </div></div>
+      <div class="day-card"><div class="day-header"><div class="day-name">Friday</div><div class="day-sub">Back + shoulders · gym shower</div></div><div class="day-body">
+        <div class="day-row"><strong>Wash:</strong> Glow Getter oil wash</div>
+        <div class="day-row"><strong>AM body:</strong> Olay Vit C · AHA deo</div>
+        <div class="day-row"><strong>PM body:</strong> Body butter only — rest night</div>
+        <div class="day-row"><strong>Face PM:</strong> Finacea night</div>
+      </div></div>
+      <div class="day-card"><div class="day-header"><div class="day-name">Saturday</div><div class="day-sub">Active rest · walk/hike</div></div><div class="day-body">
+        <div class="day-row"><strong>Wash:</strong> Glow Getter oil wash</div>
+        <div class="day-row"><strong>AM body:</strong> Olay Vit C · AHA deo</div>
+        <div class="day-row"><strong>PM body:</strong> Body butter only</div>
+        <div class="day-row"><strong>Face PM:</strong> Rest or Finacea if skin is happy</div>
+      </div></div>
+      <div class="day-card"><div class="day-header"><div class="day-name">Sunday</div><div class="day-sub">Active rest · main hair wash day</div></div><div class="day-body">
+        <div class="day-row"><strong>Wash:</strong> Glycolic acid wash</div>
+        <div class="day-row"><strong>Hair:</strong> Full bond repair wash routine</div>
+        <div class="day-row"><strong>AM body:</strong> Olay Vit C · AHA deo</div>
+        <div class="day-row"><strong>PM body:</strong> TO Glycolic + Retinol lotion + Body butter</div>
+        <div class="day-row"><strong>Face PM:</strong> Retinol night</div>
+      </div></div>
+    </div>
+  </div>
+
+  <div id="sk-rules" class="tab-panel">
+    <div class="sec-title">Non-negotiable rules</div>
+    <div class="step-list">
+      <div class="step"><div class="step-num num-warn">!</div><div class="step-info"><div class="step-product">Never double-exfoliate the body on the same day</div><div class="step-note">Glycolic body wash + TO Glycolic toner on the same day = over-exfoliation. The weekly schedule alternates these deliberately — trust the system.</div></div></div>
+      <div class="step"><div class="step-num num-warn">!</div><div class="step-info"><div class="step-product">Never use Finacea and Retinol on the same night</div><div class="step-note">Both are potent actives. If skin feels sensitised, take a rest night with just the barrier serum and Atobarrier — let your skin breathe.</div></div></div>
+      <div class="step"><div class="step-num num-warn">!</div><div class="step-info"><div class="step-product">SPF every single morning — zero exceptions</div><div class="step-note">You're using Vitamin C, Faded, Finacea and glycolic. Skipping SPF actively undoes your hyperpigmentation work.</div></div></div>
+      <div class="step"><div class="step-num num-teal">→</div><div class="step-info"><div class="step-product">Apply body lotion and glycolic to damp (not wet) skin</div><div class="step-note">Olay lotion and TO Glycolic absorb best on slightly damp skin — within 2 minutes of stepping out. Retinol lotion and Body Butter go on fully dry skin.</div></div></div>
+      <div class="step"><div class="step-num num-teal">→</div><div class="step-info"><div class="step-product">Don't wash hair more than twice a week</div><div class="step-note">Twice weekly is the sweet spot for relaxed 4C hair. More risks moisture loss and weakening the line of demarcation.</div></div></div>
+      <div class="step"><div class="step-num num-teal">→</div><div class="step-info"><div class="step-product">Dove bar is for targeted areas only</div><div class="step-note">The active washes are not appropriate for sensitive or intimate areas. Keep the Dove bar just for those.</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SHOPPING -->
+<div id="shopping" class="section">
+  <div class="hero">
+    <div class="hero-label">Shopping</div>
+    <div class="hero-title">Quick-access lists</div>
+    <div class="hero-sub">Butcher · Whole Foods · Waitrose · M&amp;S — what to pick up each week</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab(event,'sh-w1','shopping')">Week 1</button>
+    <button class="tab-btn" onclick="showTab(event,'sh-w2','shopping')">Week 2</button>
+    <button class="tab-btn" onclick="showTab(event,'sh-w3','shopping')">Week 3</button>
+    <button class="tab-btn" onclick="showTab(event,'sh-w4','shopping')">Week 4</button>
+    <button class="tab-btn" onclick="showTab(event,'sh-pantry','shopping')">Pantry</button>
+    <button class="tab-btn" onclick="showTab(event,'sh-skin','shopping')">Skincare restock</button>
+  </div>
+
+  <div id="sh-w1" class="tab-panel active">
+    <div class="tip-box"><strong>Week 1 — est. £60–72</strong> for 2 people · 5 dinners + 5 standalone lunches</div>
+    <div class="sec-title">Butcher</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Chicken thighs, boneless ~1.4kg</div><div class="shop-detail">Mon lunch, Tue &amp; Wed dinner, Thu dinner</div></div>
+      <div class="shop-item"><div class="shop-name">Turkey mince ~500g</div><div class="shop-detail">Wed lunch lettuce cups</div></div>
+      <div class="shop-item"><div class="shop-name">Lamb mince ~500g</div><div class="shop-detail">Fri dinner kofta</div></div>
+      <div class="shop-item"><div class="shop-name">Pork mince ~400g</div><div class="shop-detail">Fri lunch dan dan noodles</div></div>
+    </div>
+    <div class="sec-title">Fish — Waitrose or butcher</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Salmon fillets ~350g</div><div class="shop-detail">Mon dinner (2 fillets)</div></div>
+      <div class="shop-item"><div class="shop-name">Tuna — 2 tins or ~300g fresh</div><div class="shop-detail">Tue lunch</div></div>
+      <div class="shop-item"><div class="shop-name">Tiger prawns, raw ~400g</div><div class="shop-detail">Thu lunch</div></div>
+    </div>
+    <div class="sec-title">Extras</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">White miso paste</div><div class="shop-detail">Mon dinner</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Za'atar</div><div class="shop-detail">Tue dinner</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Saffron (small pack)</div><div class="shop-detail">Thu dinner</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Pearl barley (1 bag)</div><div class="shop-detail">Thu dinner + Fri tabbouleh</div></div>
+      <div class="shop-item"><div class="shop-name">Soba noodles (1 pack)</div><div class="shop-detail">Thu lunch</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Edamame, frozen</div><div class="shop-detail">Mon dinner</div><div class="shop-where">Waitrose / M&amp;S</div></div>
+      <div class="shop-item"><div class="shop-name">Nori sheets</div><div class="shop-detail">Tue lunch</div><div class="shop-where">Whole Foods</div></div>
+    </div>
+  </div>
+
+  <div id="sh-w2" class="tab-panel">
+    <div class="tip-box"><strong>Week 2 — est. £65–78</strong> · Short ribs and pork ribs are the premium cuts this week.</div>
+    <div class="sec-title">Butcher</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Lamb mince ~400g</div><div class="shop-detail">Mon lunch flatbread</div></div>
+      <div class="shop-item"><div class="shop-name">Poussin (2 birds)</div><div class="shop-detail">Tue dinner</div></div>
+      <div class="shop-item"><div class="shop-name">Chicken thighs, boneless ~800g</div><div class="shop-detail">Wed lunch + Thu dinner</div></div>
+      <div class="shop-item"><div class="shop-name">Turkey mince ~400g</div><div class="shop-detail">Thu lunch congee</div></div>
+      <div class="shop-item"><div class="shop-name">Pork mince ~300g</div><div class="shop-detail">Fri lunch wontons</div></div>
+      <div class="shop-item"><div class="shop-name">Beef short ribs ~1kg</div><div class="shop-detail">Wed dinner</div></div>
+      <div class="shop-item"><div class="shop-name">Pork ribs (full rack) ~1.2kg</div><div class="shop-detail">Fri dinner char siu</div></div>
+    </div>
+    <div class="sec-title">Fish</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Salmon fillet ~300g</div><div class="shop-detail">Tue lunch</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Tiger prawns, raw ~500g</div><div class="shop-detail">Mon dinner + Fri wontons</div></div>
+    </div>
+    <div class="sec-title">Extras</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Ramen noodles (1 pack)</div><div class="shop-detail">Mon dinner</div></div>
+      <div class="shop-item"><div class="shop-name">Sumac</div><div class="shop-detail">Tue dinner poussin</div><div class="shop-where">Waitrose / Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Preserved lemons (1 jar)</div><div class="shop-detail">Tue dinner — keeps months</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Star anise</div><div class="shop-detail">Wed short ribs</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Bulgur wheat (1 bag)</div><div class="shop-detail">Thu dinner adana</div></div>
+      <div class="shop-item"><div class="shop-name">Wonton wrappers (1 pack)</div><div class="shop-detail">Fri lunch</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Hoisin sauce (1 jar)</div><div class="shop-detail">Fri char siu ribs</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Five-spice powder</div><div class="shop-detail">Fri ribs</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Labneh (1 tub)</div><div class="shop-detail">Tue dinner</div><div class="shop-where">Waitrose / M&amp;S</div></div>
+    </div>
+  </div>
+
+  <div id="sh-w3" class="tab-panel">
+    <div class="tip-box"><strong>Week 3 — est. £62–76</strong> · Duck legs are the star — buy 2 large ones.</div>
+    <div class="sec-title">Butcher</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Duck legs (2 large)</div><div class="shop-detail">Mon dinner</div></div>
+      <div class="shop-item"><div class="shop-name">Chicken thighs, boneless ~800g</div><div class="shop-detail">Tue lunch + Fri dinner</div></div>
+      <div class="shop-item"><div class="shop-name">Pork mince ~500g</div><div class="shop-detail">Wed lunch mapo tofu</div></div>
+      <div class="shop-item"><div class="shop-name">Turkey mince ~400g</div><div class="shop-detail">Thu lunch</div></div>
+      <div class="shop-item"><div class="shop-name">Lamb shoulder, portioned ~900g</div><div class="shop-detail">Thu dinner slow braise</div></div>
+    </div>
+    <div class="sec-title">Fish</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Tiger prawns, raw ~800g</div><div class="shop-detail">Mon lunch + Tue dinner chermoula</div></div>
+      <div class="shop-item"><div class="shop-name">Salmon fillets ~350g</div><div class="shop-detail">Wed dinner teriyaki</div></div>
+      <div class="shop-item"><div class="shop-name">Tuna — 2 tins or ~300g</div><div class="shop-detail">Fri lunch temaki bowl</div></div>
+    </div>
+    <div class="sec-title">Extras</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Silken tofu (1 pack)</div><div class="shop-detail">Wed lunch</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Doubanjiang paste (1 jar)</div><div class="shop-detail">Wed lunch — keeps months</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Soba noodles (1 pack)</div><div class="shop-detail">Wed dinner</div></div>
+      <div class="shop-item"><div class="shop-name">Glass noodles (1 pack)</div><div class="shop-detail">Thu lunch</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Ras el hanout (1 jar)</div><div class="shop-detail">Thu lamb shoulder</div><div class="shop-where">Waitrose / M&amp;S</div></div>
+      <div class="shop-item"><div class="shop-name">Tinned chickpeas (1 tin)</div><div class="shop-detail">Thu lamb braise</div></div>
+      <div class="shop-item"><div class="shop-name">Pine nuts (small bag)</div><div class="shop-detail">Fri musakhan</div><div class="shop-where">Waitrose / M&amp;S</div></div>
+      <div class="shop-item"><div class="shop-name">Labneh (1 tub)</div><div class="shop-detail">Tue lunch</div><div class="shop-where">Waitrose / M&amp;S</div></div>
+    </div>
+  </div>
+
+  <div id="sh-w4" class="tab-panel">
+    <div class="tip-box"><strong>Week 4 — est. £60–74</strong> · Two standalone braise dishes this week.</div>
+    <div class="sec-title">Butcher</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Pork mince ~400g</div><div class="shop-detail">Mon lunch rice bowl</div></div>
+      <div class="shop-item"><div class="shop-name">Chicken thighs, boneless ~600g</div><div class="shop-detail">Tue lunch + dinner</div></div>
+      <div class="shop-item"><div class="shop-name">Poussin (2 birds)</div><div class="shop-detail">Tue dinner</div></div>
+      <div class="shop-item"><div class="shop-name">Turkey mince ~400g</div><div class="shop-detail">Wed lunch lettuce cups</div></div>
+      <div class="shop-item"><div class="shop-name">Pork ribs (full rack) ~1.2kg</div><div class="shop-detail">Wed dinner hong shao</div></div>
+      <div class="shop-item"><div class="shop-name">Beef short ribs ~800g</div><div class="shop-detail">Fri lunch ramen</div></div>
+      <div class="shop-item"><div class="shop-name">Lamb mince ~500g</div><div class="shop-detail">Fri dinner arayes</div></div>
+    </div>
+    <div class="sec-title">Fish</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Salmon fillets ~700g</div><div class="shop-detail">Mon dinner + Thu dinner</div></div>
+      <div class="shop-item"><div class="shop-name">Tiger prawns, raw ~400g</div><div class="shop-detail">Thu lunch udon soup</div></div>
+    </div>
+    <div class="sec-title">Extras</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Rose harissa (1 jar)</div><div class="shop-detail">Mon dinner</div><div class="shop-where">Waitrose / M&amp;S</div></div>
+      <div class="shop-item"><div class="shop-name">Couscous (1 bag)</div><div class="shop-detail">Mon dinner</div></div>
+      <div class="shop-item"><div class="shop-name">Furikake (1 jar)</div><div class="shop-detail">Tue lunch</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Udon noodles (1 pack)</div><div class="shop-detail">Thu lunch</div></div>
+      <div class="shop-item"><div class="shop-name">Soba noodles (1 pack)</div><div class="shop-detail">Thu dinner</div></div>
+      <div class="shop-item"><div class="shop-name">Ramen noodles (1 pack)</div><div class="shop-detail">Fri lunch</div></div>
+      <div class="shop-item"><div class="shop-name">Labneh (1 tub)</div><div class="shop-detail">Fri dinner arayes</div><div class="shop-where">Waitrose / M&amp;S</div></div>
+      <div class="shop-item"><div class="shop-name">Silken tofu (1 pack)</div><div class="shop-detail">Thu lunch</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Toasted almonds (small bag)</div><div class="shop-detail">Mon dinner couscous</div></div>
+    </div>
+  </div>
+
+  <div id="sh-pantry" class="tab-panel">
+    <div class="tip-box"><strong>One-off pantry shop</strong> — buy at the start of the month. Most of these last well beyond 4 weeks.</div>
+    <div class="sec-title">Sauces &amp; pastes</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">White miso paste</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Mirin</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Hoisin sauce</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Doubanjiang / chilli bean paste</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Pomegranate molasses</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Preserved lemons</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Tahini</div><div class="shop-where">Waitrose / Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Rose harissa</div><div class="shop-where">Waitrose / M&amp;S</div></div>
+    </div>
+    <div class="sec-title">Spices</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Za'atar</div><div class="shop-where">Waitrose / M&amp;S</div></div>
+      <div class="shop-item"><div class="shop-name">Sumac</div><div class="shop-where">Waitrose / Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Ras el hanout</div><div class="shop-where">Waitrose / M&amp;S</div></div>
+      <div class="shop-item"><div class="shop-name">Five-spice powder</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Star anise</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Kashmiri chilli powder</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Saffron</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Smoked paprika</div><div class="shop-where">Waitrose</div></div>
+    </div>
+    <div class="sec-title">Grains &amp; noodles</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Pearl barley</div><div class="shop-where">Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Soba noodles (2–3 packs)</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Ramen noodles (2 packs)</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Udon noodles</div><div class="shop-where">Whole Foods / Waitrose</div></div>
+      <div class="shop-item"><div class="shop-name">Glass noodles</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Nori sheets</div><div class="shop-where">Whole Foods</div></div>
+      <div class="shop-item"><div class="shop-name">Wonton wrappers</div><div class="shop-where">Whole Foods — freeze remainder</div></div>
+      <div class="shop-item"><div class="shop-name">Furikake seasoning</div><div class="shop-where">Whole Foods</div></div>
+    </div>
+  </div>
+
+  <div id="sh-skin" class="tab-panel">
+    <div class="tip-box"><strong>Skincare restock tracker</strong> — products you'll go through faster vs. ones that last months.</div>
+    <div class="sec-title">Restock regularly — high usage</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Olay Vitamin C Body Lotion</div><div class="shop-detail">Daily use — goes quickly</div></div>
+      <div class="shop-item"><div class="shop-name">Naturium Glycolic Acid Body Wash</div><div class="shop-detail">2–3x/week use</div></div>
+      <div class="shop-item"><div class="shop-name">Naturium Glow Getter Body Wash</div><div class="shop-detail">Alternate days use</div></div>
+      <div class="shop-item"><div class="shop-name">Saltair Body Butter</div><div class="shop-detail">Nightly use</div></div>
+      <div class="shop-item"><div class="shop-name">Sunscreen</div><div class="shop-detail">Daily — always keep a backup</div></div>
+      <div class="shop-item"><div class="shop-name">Dokdo Cleanser</div><div class="shop-detail">Twice daily</div></div>
+    </div>
+    <div class="sec-title">Check every 2–3 months</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Finacea 15% Gel</div><div class="shop-detail">Prescription — plan ahead</div></div>
+      <div class="shop-item"><div class="shop-name">Medik8 Retinol</div><div class="shop-detail">Alternate nights</div></div>
+      <div class="shop-item"><div class="shop-name">Topical Faded Serum</div><div class="shop-detail">Daily AM</div></div>
+      <div class="shop-item"><div class="shop-name">The Ordinary Glycolic Acid</div><div class="shop-detail">2–3x/week body</div></div>
+      <div class="shop-item"><div class="shop-name">Saltair Retinol Body Lotion</div><div class="shop-detail">2–3x/week</div></div>
+      <div class="shop-item"><div class="shop-name">Innisfree Vitamin C Serum</div><div class="shop-detail">Daily AM</div></div>
+    </div>
+    <div class="sec-title">Long-lasting — restock when nearly empty</div><div class="shop-grid">
+      <div class="shop-item"><div class="shop-name">Aestura Atobarrier365 Cream</div><div class="shop-detail">Nightly small amounts</div></div>
+      <div class="shop-item"><div class="shop-name">Beta-Glucan Barrier Serum</div><div class="shop-detail">PM only</div></div>
+      <div class="shop-item"><div class="shop-name">Byoma Milky Toner</div><div class="shop-detail">PM only</div></div>
+      <div class="shop-item"><div class="shop-name">Saltair AHA Deodorant</div><div class="shop-detail">Daily but lasts well</div></div>
+      <div class="shop-item"><div class="shop-name">Bubble Eye Cream</div><div class="shop-detail">AM + PM, small amounts</div></div>
+      <div class="shop-item"><div class="shop-name">Equalberry Toner</div><div class="shop-detail">AM only</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showSection(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function showTab(e,id,scope){
+  const sec=document.getElementById(scope);
+  sec.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  sec.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  e.target.classList.add('active');
+}
+function showSub(e,id,scope){
+  const panel=document.getElementById(scope);
+  panel.querySelectorAll('.sub-panel').forEach(p=>p.classList.remove('active'));
+  panel.querySelectorAll('.sub-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  e.target.classList.add('active');
+}
+</script>
+</body>
+</html>
